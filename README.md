@@ -8,4 +8,4 @@ OR
 
 Voila, add *patternify.js* in your project and *patternify.js* does it with ease. 
 
-Check the complete documentation [here](https://github.com/AyanGhatak/patternify/docs/blob/master/Documentation.md)
+Check the complete documentation [here](https://github.com/AyanGhatak/patternify/blob/master/docs/Documentation.md)
