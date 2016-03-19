@@ -1,0 +1,17 @@
+body {
+    padding: 5px;
+    margin: 0 auto;
+}
+#indicatorDiv {
+    width: 500px;
+    font-family:'Arial', 'Helvetica';
+    font-size: 13px;
+}
+#format {
+    height: 25px;
+    font-size: 12px;
+}
+#export {
+    height: 25px;
+    font-size: 13px;
+}
