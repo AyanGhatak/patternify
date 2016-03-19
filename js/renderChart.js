@@ -1,5 +1,7 @@
 FusionCharts.ready(function () {
-    var strokeThickness = 1,
+    var image,
+        context,
+        strokeThickness = 10,
         TRUE = true,
         width = 500,
         height = 300,
@@ -11,9 +13,13 @@ FusionCharts.ready(function () {
             return (isAbscissa ? xaxisminvalue : yaxisminvalue) + (Math.random() *
                 (isAbscissa ? (xaxismaxvalue - xaxisminvalue) : (yaxismaxvalue - yaxisminvalue)))
         },
+        updateImage = function () {
+            image.src = 'data:image/svg+xml;base64,'+window.btoa(railwayChart.getSVGString());
+            context.drawImage(image, 0, 0);
+        },
         railwayChart = new FusionCharts({
         type: 'dragnode',
-        renderAt: 'chart-container',
+        renderAt: 'chart-container',    
         width: width,
         height: height,
         dataFormat: 'json',
@@ -25,7 +31,9 @@ FusionCharts.ready(function () {
                 "yaxismaxvalue":yaxismaxvalue,
                 "viewmode":"1",
                 "theme":"fint",
-                "showXAxisLine": "0"
+                "showXAxisLine": "0",
+                "showHoverEffect": "0",
+                "showToolTip": "0"
             },
             "dataset":[
                 {
@@ -129,18 +137,21 @@ FusionCharts.ready(function () {
         },
         "events": {
             "rendered": function () {
-                var image = new Image(),
-                    canvasElem = document.getElementById("tempCanvas");
+                var canvasElem = document.getElementById("tempCanvas");
+                image = new Image();
                 if (!canvasElem) {
                     canvasElem = document.createElement('canvas');
+                    context = canvasElem.getContext("2d");
                     canvasElem.id = "tempCanvas";
                     canvasElem.width = width;
                     canvasElem.height = height;
                     document.getElementsByTagName("body")[0].appendChild(canvasElem);
                 }
-                image.src = 'data:image/svg+xml;base64,'+window.btoa(railwayChart.getSVGString());
-                canvasElem.getContext("2d").drawImage(image, 0, 0);
-            }
+                updateImage();
+            },
+            "dataplotDragEnd": function () {
+                setTimeout(updateImage);
+            },
         }
     }).render();
 });
