@@ -11,7 +11,7 @@ Binarifier.prototype.init = function (canvasElem, grayScaleAlgo) {
 	binarify.grayScaler = binarify.grayScaler(grayScaleAlgo);
 	binarify.dimensions = binarify.dimensions();
 };
-// Converts the image 
+// Converts the image to its grayscale equivalent.
 Binarifier.prototype.grayScaler = function () {
 	var binarify = this,
 		algo = binarify.grayScaleAlgo.call(binarify, arguments[0]),
