@@ -36,7 +36,7 @@ FusionCharts.ready(function () {
                     image.src = 'data:image/svg+xml;base64,'+window.btoa(railwayChart.getSVGString());
                     context.drawImage(image, 0, 0);
                     binarify.grayScaler();
-                });
+                }, 50);
             }
         },
         railwayChart = new FusionCharts({
@@ -47,10 +47,6 @@ FusionCharts.ready(function () {
             dataFormat: 'json',
             dataSource: {
                 "chart":{
-                    "xaxisminvalue":xaxisminvalue,
-                    "xaxismaxvalue":xaxismaxvalue,
-                    "yaxisminvalue":yaxisminvalue,
-                    "yaxismaxvalue":yaxismaxvalue,
                     "viewmode":"1",
                     "theme":"fint",
                     "showXAxisLine": "0",

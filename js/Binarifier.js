@@ -8,6 +8,7 @@ Binarifier.prototype.init = function (canvasElem, grayScaleAlgo) {
 	var binarify = this;
 	binarify.canvasElem = canvasElem;
 	binarify.ctx = canvasElem.getContext("2d");
+	binarify.histogram = binarify.histogram();
 	binarify.grayScaler = binarify.grayScaler(grayScaleAlgo);
 	binarify.dimensions = binarify.dimensions();
 };
@@ -15,8 +16,10 @@ Binarifier.prototype.init = function (canvasElem, grayScaleAlgo) {
 Binarifier.prototype.grayScaler = function () {
 	var binarify = this,
 		algo = binarify.grayScaleAlgo.call(binarify, arguments[0]),
+		histogram = binarify.histogram,
 		converter = function (colorArr, forcedAlgo) {
-			colorArr[0] = colorArr[1] = colorArr[2] = (forcedAlgo ? forcedAlgo(colorArr) : algo(colorArr));
+			var gray = histogram.addItem(forcedAlgo ? forcedAlgo(colorArr) : algo(colorArr));
+			colorArr[0] = colorArr[1] = colorArr[2] = gray;
 			return colorArr;
 		};
 	return function (forcedAlgo) {
@@ -34,6 +37,60 @@ Binarifier.prototype.grayScaler = function () {
 		binarify.putImageData(imageData)
 	}
 };
+
+Binarifier.prototype.otsu = function (histogram, total) {
+	var mB,
+    	mF,
+    	sum = 0,
+    	sumB = 0,
+    	wB = 0,
+    	wF = 0,
+    	max = 0.0,
+    	between = 0.0,
+    	threshold1 = 0.0,
+    	threshold2 = 0.0;
+    
+    for (var i = 1; i < 256; ++i)
+        sum += i * histogram[i];
+    
+    for (var i = 0; i < 256; ++i) {
+        wB += histogram[i];
+        if (wB == 0)
+            continue;
+        wF = total - wB;
+        if (wF == 0)
+            break;
+        sumB += i * histogram[i];
+        mB = sumB / wB;
+        mF = (sum - sumB) / wF;
+        between = wB * wF * (mB - mF) * (mB - mF);
+        if ( between >= max ) {
+            threshold1 = i;
+            if ( between > max ) {
+                threshold2 = i;
+            }
+            max = between;            
+        }
+    }
+    return ( threshold1 + threshold2 ) / 2.0;
+};
+
+Binarifier.prototype.histogram = function () {
+	var i,
+		histogramArr = Array(256);
+	for (i = 0; i < 256; ++i) {
+		histogramArr[i] = 0;
+	}
+	return {
+		addItem: function (gray) {
+			histogramArr[Math.round(gray)] += 1;
+			return gray;
+		},
+		get: function () {
+			return histogramArr;
+		}
+	}
+}; 
 
 Binarifier.prototype.grayScaleAlgo = function (defaultAlgoName) {
 	var algo = {
@@ -62,9 +119,19 @@ Binarifier.prototype.getImageData = function () {
 };
 
 Binarifier.prototype.putImageData = function (imageData) {
-	var binarify = this,
+	var i,
+		binarify = this,
 		ctx = binarify.ctx,
-		dimensions = binarify.dimensions.get();
+		dimensions = binarify.dimensions.get(),
+		data = imageData.data,
+		len = data.length,
+		histogram = binarify.histogram.get(),
+		threshold = binarify.otsu(histogram, len / 4);
+	for (i = 0; i < len; i += 4) {
+		data[i] = data[i + 1] = data[i + 2] = data[i] >= threshold ? 255 : 0;
+	  // opacity 255 = 100%
+	  data[i + 3] = 255;
+	}
 	return ctx.putImageData(imageData, dimensions.x, dimensions.y);
 };
 
